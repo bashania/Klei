@@ -1,0 +1,19 @@
+# Dependencies and generated output
+node_modules/
+dist/
+
+# Local environment files
+.env
+.env.*
+.venv/
+
+# OS/editor noise
+.DS_Store
+
+# Existing local files from the previous digest project in this folder
+.claude/
+digest.log
+digest.py
+requirements.txt
+sent_articles.db
+setup.sh
