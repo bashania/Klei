@@ -50,19 +50,25 @@ const detailSections = [
 export default function ProjectView({ project, onBack, onEdit, onDelete }) {
   return (
     <section className="screen detail-screen">
-      <header className="detail-header">
-        <button className="text-button" type="button" onClick={onBack}>
-          Terug
+      <nav className="navigation-bar" aria-label="Projectnavigatie">
+        <button className="nav-button back-button" type="button" onClick={onBack}>
+          <span aria-hidden="true">‹</span> Projecten
         </button>
+        <button className="nav-button strong" type="button" onClick={onEdit}>
+          Wijzig
+        </button>
+      </nav>
+
+      <header className="large-title detail-title">
         <span className="status-pill">{project.status}</span>
         <h1>{project.name || 'Project zonder naam'}</h1>
-        <p>{project.objectType} · {project.technique}</p>
+        <p>{project.objectType} · {project.technique} · {formatDetailDate(project.startDate)}</p>
       </header>
 
       {detailSections.map((section) => (
-        <section className="detail-section" key={section.title}>
+        <section className="ios-section detail-section" key={section.title}>
           <h2>{section.title}</h2>
-          <dl>
+          <dl className="ios-list detail-list">
             {section.items.map(([label, key]) => (
               <div key={key}>
                 <dt>{label}</dt>
@@ -73,14 +79,20 @@ export default function ProjectView({ project, onBack, onEdit, onDelete }) {
         </section>
       ))}
 
-      <div className="sticky-actions">
-        <button className="danger-button" type="button" onClick={onDelete}>
+      <section className="ios-section">
+        <div className="ios-list">
+          <button className="destructive-row" type="button" onClick={onDelete}>
           Verwijderen
         </button>
-        <button className="primary-button" type="button" onClick={onEdit}>
-          Bewerken
-        </button>
-      </div>
+        </div>
+      </section>
     </section>
+  );
+}
+
+function formatDetailDate(dateValue) {
+  if (!dateValue) return 'geen startdatum';
+  return new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }).format(
+    new Date(dateValue),
   );
 }

@@ -26,6 +26,10 @@ export default function App() {
     () => projects.find((project) => project.id === activeProjectId),
     [projects, activeProjectId],
   );
+  const pendingDeleteProject = useMemo(
+    () => projects.find((project) => project.id === pendingDeleteId),
+    [projects, pendingDeleteId],
+  );
 
   function openNewProject() {
     setActiveProjectId(null);
@@ -94,15 +98,23 @@ export default function App() {
       )}
 
       {pendingDeleteId && (
-        <div className="modal-backdrop" role="presentation">
-          <section className="confirm-panel" aria-labelledby="delete-title" role="dialog" aria-modal="true">
+        <div className="modal-backdrop" role="presentation" onClick={() => setPendingDeleteId(null)}>
+          <section
+            className="confirm-panel"
+            aria-labelledby="delete-title"
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
             <h2 id="delete-title">Project verwijderen?</h2>
-            <p>Dit project wordt uit dit apparaat verwijderd.</p>
-            <div>
-              <button className="secondary-button" type="button" onClick={() => setPendingDeleteId(null)}>
+            <p>
+              {pendingDeleteProject?.name || 'Dit project'} wordt alleen uit dit apparaat verwijderd.
+            </p>
+            <div className="confirm-actions">
+              <button className="ios-button secondary" type="button" onClick={() => setPendingDeleteId(null)}>
                 Annuleren
               </button>
-              <button className="danger-button" type="button" onClick={() => deleteProject(pendingDeleteId)}>
+              <button className="ios-button destructive filled" type="button" onClick={() => deleteProject(pendingDeleteId)}>
                 Verwijderen
               </button>
             </div>

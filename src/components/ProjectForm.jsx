@@ -50,6 +50,7 @@ const sections = [
 
 export default function ProjectForm({ title, initialValues, onCancel, onSave }) {
   const [formValues, setFormValues] = useState(initialValues);
+  const canSave = formValues.name.trim().length > 0;
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -63,30 +64,31 @@ export default function ProjectForm({ title, initialValues, onCancel, onSave }) 
 
   return (
     <form className="screen form-screen" onSubmit={handleSubmit}>
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Project</p>
-          <h1>{title}</h1>
-        </div>
+      <nav className="navigation-bar" aria-label="Projectformulier">
+        <button className="nav-button" type="button" onClick={onCancel}>
+          Annuleer
+        </button>
+        <span className="nav-title">{title}</span>
+        <button className="nav-button strong" type="submit" disabled={!canSave}>
+          Opslaan
+        </button>
+      </nav>
+
+      <header className="large-title form-title">
+        <h1>{title}</h1>
+        <p>Vul alleen in wat je nu weet. Je kunt later altijd aanvullen.</p>
       </header>
 
       {sections.map((section) => (
-        <section className="form-section" key={section.title}>
+        <section className="ios-section" key={section.title}>
           <h2>{section.title}</h2>
-          {section.fields.map((field) => (
-            <Field key={field.name} field={field} value={formValues[field.name] ?? ''} onChange={updateField} />
-          ))}
+          <div className="ios-list form-list">
+            {section.fields.map((field) => (
+              <Field key={field.name} field={field} value={formValues[field.name] ?? ''} onChange={updateField} />
+            ))}
+          </div>
         </section>
       ))}
-
-      <div className="sticky-actions">
-        <button className="secondary-button" type="button" onClick={onCancel}>
-          Annuleren
-        </button>
-        <button className="primary-button" type="submit">
-          Opslaan
-        </button>
-      </div>
     </form>
   );
 }
@@ -99,10 +101,11 @@ function Field({ field, value, onChange }) {
     onChange,
     required: field.required,
     placeholder: field.placeholder,
+    autoComplete: 'off',
   };
 
   return (
-    <label className="field" htmlFor={field.name}>
+    <label className={`field ${field.type === 'textarea' ? 'textarea-field' : ''}`} htmlFor={field.name}>
       <span>{field.label}</span>
       {field.type === 'select' && (
         <select {...sharedProps}>
@@ -115,7 +118,7 @@ function Field({ field, value, onChange }) {
       )}
       {field.type === 'textarea' && <textarea {...sharedProps} rows="4" />}
       {field.type !== 'select' && field.type !== 'textarea' && (
-        <input {...sharedProps} type={field.type} min={field.min} />
+        <input {...sharedProps} type={field.type} min={field.min} inputMode={field.type === 'number' ? 'numeric' : undefined} />
       )}
     </label>
   );
