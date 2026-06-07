@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createProject, emptyProject, updateProject } from './projectModel';
+import { deletePhoto, deletePhotosForProject, loadPhotos, savePhoto } from './photoStore';
 import { loadProjects, saveProjects } from './storage';
 import ProjectForm from './components/ProjectForm';
 import ProjectList from './components/ProjectList';
@@ -17,10 +18,15 @@ export default function App() {
   const [screen, setScreen] = useState(screens.list);
   const [activeProjectId, setActiveProjectId] = useState(null);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     saveProjects(projects);
   }, [projects]);
+
+  useEffect(() => {
+    loadPhotos().then(setPhotos);
+  }, []);
 
   const activeProject = useMemo(
     () => projects.find((project) => project.id === activeProjectId),
@@ -30,6 +36,16 @@ export default function App() {
     () => projects.find((project) => project.id === pendingDeleteId),
     [projects, pendingDeleteId],
   );
+  const activeProjectPhotos = useMemo(
+    () => photos.filter((photo) => photo.projectId === activeProjectId),
+    [photos, activeProjectId],
+  );
+  const coverPhotosByProject = useMemo(() => {
+    return photos.reduce((covers, photo) => {
+      if (!covers[photo.projectId]) covers[photo.projectId] = photo;
+      return covers;
+    }, {});
+  }, [photos]);
 
   function openNewProject() {
     setActiveProjectId(null);
@@ -57,17 +73,34 @@ export default function App() {
     setScreen(screens.view);
   }
 
-  function deleteProject(projectId) {
+  async function deleteProject(projectId) {
+    await deletePhotosForProject(projectId);
+    setPhotos((currentPhotos) => currentPhotos.filter((photo) => photo.projectId !== projectId));
     setProjects((currentProjects) => currentProjects.filter((item) => item.id !== projectId));
     setActiveProjectId(null);
     setPendingDeleteId(null);
     setScreen(screens.list);
   }
 
+  async function addProjectPhoto(photoInput) {
+    const photo = await savePhoto({ ...photoInput, projectId: activeProjectId });
+    setPhotos((currentPhotos) => [photo, ...currentPhotos]);
+  }
+
+  async function removeProjectPhoto(photoId) {
+    await deletePhoto(photoId);
+    setPhotos((currentPhotos) => currentPhotos.filter((photo) => photo.id !== photoId));
+  }
+
   return (
     <main className="app-shell">
       {screen === screens.list && (
-        <ProjectList projects={projects} onNew={openNewProject} onOpen={openProject} />
+        <ProjectList
+          projects={projects}
+          coverPhotosByProject={coverPhotosByProject}
+          onNew={openNewProject}
+          onOpen={openProject}
+        />
       )}
 
       {screen === screens.new && (
@@ -82,9 +115,12 @@ export default function App() {
       {screen === screens.view && activeProject && (
         <ProjectView
           project={activeProject}
+          photos={activeProjectPhotos}
           onBack={() => setScreen(screens.list)}
           onEdit={() => setScreen(screens.edit)}
           onDelete={() => setPendingDeleteId(activeProject.id)}
+          onAddPhoto={addProjectPhoto}
+          onDeletePhoto={removeProjectPhoto}
         />
       )}
 

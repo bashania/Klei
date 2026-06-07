@@ -8,7 +8,7 @@ function formatDate(dateValue) {
   );
 }
 
-export default function ProjectList({ projects, onNew, onOpen }) {
+export default function ProjectList({ projects, coverPhotosByProject, onNew, onOpen }) {
   const [activeStatus, setActiveStatus] = useState('alle');
   const visibleProjects = useMemo(() => {
     if (activeStatus === 'alle') return projects;
@@ -60,6 +60,13 @@ export default function ProjectList({ projects, onNew, onOpen }) {
               type="button"
               onClick={() => onOpen(project.id)}
             >
+              <span className="project-cover" aria-hidden="true">
+                {coverPhotosByProject[project.id] ? (
+                  <img src={coverPhotosByProject[project.id].imageData} alt="" />
+                ) : (
+                  <span>{project.objectType.slice(0, 1).toUpperCase()}</span>
+                )}
+              </span>
               <span className="project-row-main">
                 <span className="project-row-title">{project.name || 'Project zonder naam'}</span>
                 <span className="project-row-subtitle">
