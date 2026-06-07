@@ -252,6 +252,32 @@ button {
   text-transform: uppercase;
 }
 
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 18px 0 8px;
+}
+
+.section-heading-row h2 {
+  margin: 0 0 0 16px;
+}
+
+.add-row-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  margin-right: 4px;
+  color: #ffffff;
+  background: var(--tint);
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .ios-list {
   overflow: hidden;
   border-radius: 14px;
@@ -333,6 +359,70 @@ button {
   padding: 18px;
   color: var(--secondary-label);
   text-align: center;
+}
+
+.glaze-section {
+  margin: 0;
+}
+
+.empty-add-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--tint);
+  background: var(--secondary-background);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.empty-add-row span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: var(--tint);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.glaze-layer {
+  border-bottom: 8px solid var(--system-background);
+}
+
+.glaze-layer:last-child {
+  border-bottom: 0;
+}
+
+.glaze-layer-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  border-bottom: 0.5px solid var(--separator);
+  padding: 0 16px;
+}
+
+.glaze-layer-title span {
+  color: var(--secondary-label);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.glaze-layer-title button {
+  min-height: 44px;
+  border: 0;
+  padding: 0;
+  color: var(--red);
+  background: transparent;
+  cursor: pointer;
 }
 
 .field {
@@ -420,6 +510,10 @@ button {
 
 .detail-list div:last-child {
   border-bottom: 0;
+}
+
+.nested-detail-section {
+  margin-top: 18px;
 }
 
 dt {

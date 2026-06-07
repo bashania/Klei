@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { objectTypes, statuses, techniques } from '../projectModel';
+import { normalizeProject, objectTypes, statuses, techniques } from '../projectModel';
 
 const sections = [
   {
@@ -22,15 +22,6 @@ const sections = [
     ],
   },
   {
-    title: 'Glazuur',
-    fields: [
-      { name: 'glazeOne', label: 'Glazuur 1', type: 'text' },
-      { name: 'glazeOneLayers', label: 'Aantal lagen glazuur 1', type: 'number', min: '0' },
-      { name: 'glazeTwo', label: 'Glazuur 2', type: 'text' },
-      { name: 'glazeTwoLayers', label: 'Aantal lagen glazuur 2', type: 'number', min: '0' },
-    ],
-  },
-  {
     title: 'Stook',
     fields: [
       { name: 'biscuitTemperature', label: 'Biscuit temperatuur', type: 'text', placeholder: 'Bijv. 950 °C' },
@@ -49,7 +40,7 @@ const sections = [
 ];
 
 export default function ProjectForm({ title, initialValues, onCancel, onSave }) {
-  const [formValues, setFormValues] = useState(initialValues);
+  const [formValues, setFormValues] = useState(() => normalizeProject(initialValues));
   const canSave = formValues.name.trim().length > 0;
 
   function updateField(event) {
@@ -60,6 +51,29 @@ export default function ProjectForm({ title, initialValues, onCancel, onSave }) 
   function handleSubmit(event) {
     event.preventDefault();
     onSave(formValues);
+  }
+
+  function addGlazeLayer() {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      glazeLayers: [...(currentValues.glazeLayers || []), { glaze: '', layers: '' }],
+    }));
+  }
+
+  function updateGlazeLayer(index, field, value) {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      glazeLayers: (currentValues.glazeLayers || []).map((layer, layerIndex) =>
+        layerIndex === index ? { ...layer, [field]: value } : layer,
+      ),
+    }));
+  }
+
+  function removeGlazeLayer(index) {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      glazeLayers: (currentValues.glazeLayers || []).filter((_, layerIndex) => layerIndex !== index),
+    }));
   }
 
   return (
@@ -87,6 +101,14 @@ export default function ProjectForm({ title, initialValues, onCancel, onSave }) 
               <Field key={field.name} field={field} value={formValues[field.name] ?? ''} onChange={updateField} />
             ))}
           </div>
+          {section.title === 'Klei' && (
+            <GlazeLayersSection
+              layers={formValues.glazeLayers || []}
+              onAdd={addGlazeLayer}
+              onRemove={removeGlazeLayer}
+              onUpdate={updateGlazeLayer}
+            />
+          )}
         </section>
       ))}
     </form>
@@ -121,5 +143,61 @@ function Field({ field, value, onChange }) {
         <input {...sharedProps} type={field.type} min={field.min} inputMode={field.type === 'number' ? 'numeric' : undefined} />
       )}
     </label>
+  );
+}
+
+function GlazeLayersSection({ layers, onAdd, onRemove, onUpdate }) {
+  return (
+    <section className="ios-section glaze-section">
+      <div className="section-heading-row">
+        <h2>Glazuur</h2>
+        <button className="add-row-button" type="button" onClick={onAdd} aria-label="Glazuurlaag toevoegen">
+          +
+        </button>
+      </div>
+
+      {layers.length === 0 ? (
+        <button className="empty-add-row" type="button" onClick={onAdd}>
+          <span aria-hidden="true">+</span>
+          Glazuurlaag toevoegen
+        </button>
+      ) : (
+        <div className="ios-list glaze-list">
+          {layers.map((layer, index) => (
+            <div className="glaze-layer" key={index}>
+              <div className="glaze-layer-title">
+                <span>Laag {index + 1}</span>
+                <button type="button" onClick={() => onRemove(index)} aria-label={`Glazuurlaag ${index + 1} verwijderen`}>
+                  Verwijder
+                </button>
+              </div>
+              <label className="field" htmlFor={`glaze-${index}`}>
+                <span>Glazuur</span>
+                <input
+                  id={`glaze-${index}`}
+                  value={layer.glaze}
+                  onChange={(event) => onUpdate(index, 'glaze', event.target.value)}
+                  placeholder="Bijv. Celadon groen"
+                  autoComplete="off"
+                />
+              </label>
+              <label className="field" htmlFor={`glaze-layers-${index}`}>
+                <span>Aantal lagen</span>
+                <input
+                  id={`glaze-layers-${index}`}
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={layer.layers}
+                  onChange={(event) => onUpdate(index, 'layers', event.target.value)}
+                  placeholder="Bijv. 3"
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

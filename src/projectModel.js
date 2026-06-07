@@ -12,10 +12,7 @@ export const emptyProject = {
   technique: 'draaien',
   sizeBefore: '',
   sizeAfter: '',
-  glazeOne: '',
-  glazeOneLayers: '',
-  glazeTwo: '',
-  glazeTwoLayers: '',
+  glazeLayers: [],
   biscuitTemperature: '',
   finalTemperature: '',
   firingProgram: '',
@@ -23,6 +20,20 @@ export const emptyProject = {
   wentWell: '',
   nextTime: '',
 };
+
+export function normalizeProject(project) {
+  if (Array.isArray(project.glazeLayers)) return project;
+
+  const glazeLayers = [
+    { glaze: project.glazeOne || '', layers: project.glazeOneLayers || '' },
+    { glaze: project.glazeTwo || '', layers: project.glazeTwoLayers || '' },
+  ].filter((layer) => layer.glaze || layer.layers);
+
+  return {
+    ...project,
+    glazeLayers,
+  };
+}
 
 export function createProject(formValues) {
   const now = new Date().toISOString();

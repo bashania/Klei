@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizeProject } from '../projectModel';
 
 const detailSections = [
   {
@@ -21,15 +22,6 @@ const detailSections = [
     ],
   },
   {
-    title: 'Glazuur',
-    items: [
-      ['Glazuur 1', 'glazeOne'],
-      ['Aantal lagen glazuur 1', 'glazeOneLayers'],
-      ['Glazuur 2', 'glazeTwo'],
-      ['Aantal lagen glazuur 2', 'glazeTwoLayers'],
-    ],
-  },
-  {
     title: 'Stook',
     items: [
       ['Biscuit temperatuur', 'biscuitTemperature'],
@@ -48,6 +40,9 @@ const detailSections = [
 ];
 
 export default function ProjectView({ project, onBack, onEdit, onDelete }) {
+  const normalizedProject = normalizeProject(project);
+  const glazeLayers = normalizedProject.glazeLayers || [];
+
   return (
     <section className="screen detail-screen">
       <nav className="navigation-bar" aria-label="Projectnavigatie">
@@ -60,9 +55,9 @@ export default function ProjectView({ project, onBack, onEdit, onDelete }) {
       </nav>
 
       <header className="large-title detail-title">
-        <span className="status-pill">{project.status}</span>
-        <h1>{project.name || 'Project zonder naam'}</h1>
-        <p>{project.objectType} · {project.technique} · {formatDetailDate(project.startDate)}</p>
+        <span className="status-pill">{normalizedProject.status}</span>
+        <h1>{normalizedProject.name || 'Project zonder naam'}</h1>
+        <p>{normalizedProject.objectType} · {normalizedProject.technique} · {formatDetailDate(normalizedProject.startDate)}</p>
       </header>
 
       {detailSections.map((section) => (
@@ -72,10 +67,11 @@ export default function ProjectView({ project, onBack, onEdit, onDelete }) {
             {section.items.map(([label, key]) => (
               <div key={key}>
                 <dt>{label}</dt>
-                <dd>{project[key] || 'Niet ingevuld'}</dd>
+                <dd>{normalizedProject[key] || 'Niet ingevuld'}</dd>
               </div>
             ))}
           </dl>
+          {section.title === 'Klei' && <GlazeLayersDetail layers={glazeLayers} />}
         </section>
       ))}
 
@@ -87,6 +83,32 @@ export default function ProjectView({ project, onBack, onEdit, onDelete }) {
         </div>
       </section>
     </section>
+  );
+}
+
+function GlazeLayersDetail({ layers }) {
+  return (
+    <div className="nested-detail-section">
+      <h2>Glazuur</h2>
+      <dl className="ios-list detail-list">
+        {layers.length === 0 ? (
+          <div>
+            <dt>Glazuurlagen</dt>
+            <dd>Niet ingevuld</dd>
+          </div>
+        ) : (
+          layers.map((layer, index) => (
+            <div key={`${layer.glaze}-${index}`}>
+              <dt>Laag {index + 1}</dt>
+              <dd>
+                {layer.glaze || 'Glazuur niet ingevuld'}
+                {layer.layers ? ` · ${layer.layers} laag${layer.layers === '1' ? '' : 'en'}` : ''}
+              </dd>
+            </div>
+          ))
+        )}
+      </dl>
+    </div>
   );
 }
 
